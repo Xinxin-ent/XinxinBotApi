@@ -2,9 +2,9 @@
 #启动调试模式可以在后台输出原本JSON消息
 debug: false
 #对接的机器人框架
-#可选择对接go-cqhttp和Mirai机器人
+#可选择对接使用 OneBot 标准的机器人和 Mirai 机器人
 #Mirai机器人需自行安装mirai-api-http插件
-BotFrame: "Mirai"
+BotFrame: "OneBot"
 #对接Mirai需要设置的配置
 #若对接其他接口则无需设置
 Mirai:
@@ -15,25 +15,37 @@ Mirai:
   #mirai-api-http中设置的WebSocket地址
   WebSocket: "ws://127.0.0.1:8080"
 #对接go-cqhttp需要设置的配置
-Go-cqhttp:
+OneBot:
   #go-cqhttp的config内设置的WebSocket地址+端口
   WebSocket: "ws://127.0.0.1:6700"
+  #机器人设置的AccessToken，默认是无的
+  AccessToken: ""
   #go-cqhttp的config内设置的Http地址+端口
   Http: "http://127.0.0.1:5700"
 #是否在启动插件时自动连接
 #此功能需提前开启机器人后台且机器人对接地址正确
 AutoOpen: false
+#是否在机器人断开连接时自动重连
+Reconnect: false
+#最大重连次数
+MaxReconnect: 5
+#任务处理超时秒数
+TaskTimeout: 10
+#最大线程数量
+MaxActiveCount: 10
 #绑定账号设置
 SetBind:
   #是否开启绑定账号功能
   #若不开启可通过其他插件或指令进行绑定操作
   Enable: true
   #绑定时需在群里发送的指令，指令后面即为需绑定的游戏账号
-  #举个栗子：#绑定账号 wssb
+  #举个栗子：#绑定账号 Xinxin
   Command: "#绑定账号 "
 MySQL:
   #是否启用MySQL数据库保存，若为false则为本地Yml保存
   Enable: false
+  #是否开启ssl连接
+  useSSL: false
   #数据库服务器地址
   Host: localhost
   #数据库服务器端口
@@ -49,12 +61,12 @@ Message:
   Bind:
     - "▌绑定成功 ┈━═☆"
     - "成功绑定账号: %Player%"
-    - "你他妈绑定成功了呢~"
+    - "你的账号绑定成功了！"
   BindFail:
     - "▌绑定失败 ┈━═☆"
     - "你的QQ已经绑定或 %Player% 已被绑定"
-    - "你他妈不能再绑定了呢~"
+    - "你不能再进行绑定了！"
   NotOnline:
     - "▌玩家不在线 ┈━═☆"
     - "%Player% 不在线或者不存在哦"
-    - "还他妈不上线搁这玩QQ呢~"
+    - "赶紧登录服务器完成绑定吧！"
