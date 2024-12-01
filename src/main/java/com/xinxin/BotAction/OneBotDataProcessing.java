@@ -1,7 +1,10 @@
 package com.xinxin.BotAction;
 
 import com.xinxin.BotInterface.BotDataProcessing;
+import com.xinxin.BotTool.OneBotMessageTool;
 import net.sf.json.JSONObject;
+
+import java.util.Objects;
 
 import static com.xinxin.PluginBasicTool.WebSocket.response;
 
@@ -16,54 +19,53 @@ public class OneBotDataProcessing implements BotDataProcessing {
         }*/
 
         //通用数据
-        long time = json.has("time") ? json.getLong("time") : 0;
-        long self_id = json.has("self_id") ? json.getLong("self_id"):0;
-        String post_type = json.has("post_type") ? json.getString("post_type") : null;
+        long time = OneBotMessageTool.getJsonLong(json,"time");
+        long self_id = OneBotMessageTool.getJsonLong(json,"self_id");
+        String post_type = OneBotMessageTool.getJsonString(json,"post_type");
 
         //如果数据类型为 meta_event 则不处理数据
-        if(post_type == null || json.getString("post_type").equalsIgnoreCase("meta_event")){
+        if(Objects.equals(post_type, "") || post_type.equalsIgnoreCase("meta_event")){
             return;
         }
 
         //多次调用数据
-        long user_id = json.has("user_id") ? json.getLong("user_id") : 0;
-        long group_id = json.has("group_id") ? json.getLong("group_id"): 0;
-        long operator_id = json.has("operator_id") ? json.getLong("operator_id") : 0;
-        long message_id = json.has("message_id") ? json.getLong("message_id") : 0;
-        String sub_type = json.has("sub_type") ? json.getString("sub_type") : "";
+        long user_id = OneBotMessageTool.getJsonLong(json,"user_id");
+        long group_id = OneBotMessageTool.getJsonLong(json,"group_id");
+        long operator_id = OneBotMessageTool.getJsonLong(json,"operator_id");
+        long message_id = OneBotMessageTool.getJsonLong(json,"message_id");
+        String sub_type = OneBotMessageTool.getJsonString(json,"sub_type");
         switch (post_type){
             //如果是消息类型数据
             case "message":
-                String message_type = json.getString("message_type");
-                String message = json.getString("raw_message");
+                String message_type = OneBotMessageTool.getJsonString(json,"message_type");
+                String message = OneBotMessageTool.getJsonString(json,"raw_message");
 
                 String arrayJsonMessage = "";
-
                 try {
                     arrayJsonMessage = json.getJSONArray("message").toString();
                 }catch (Exception e){
-                    arrayJsonMessage = json.getString("message");
+                    arrayJsonMessage = OneBotMessageTool.getJsonString(json,"message");
                 }
 
-                long font = json.getLong("font");
-                String sender_nickname = JSONObject.fromObject(json.getString("sender")).getString("nickname");
+                long font = OneBotMessageTool.getJsonLong(json,"font");
+                String sender_nickname = OneBotMessageTool.getJsonString(JSONObject.fromObject(OneBotMessageTool.getJsonString(json,"sender")),"nickname");
                 //如果是私聊消息
                 if(message_type.equals("private")){
                     callPrivateMessageEvent(data,time,self_id, post_type, message_type, sub_type, message_id, user_id, message, arrayJsonMessage, font, sender_nickname);
                     break;
                 }
 
-                String sender_card = JSONObject.fromObject(json.getString("sender")).getString("card");
-                String sender_role = JSONObject.fromObject(json.getString("sender")).getString("role");
+                String sender_card = OneBotMessageTool.getJsonString(JSONObject.fromObject(OneBotMessageTool.getJsonString(json,"sender")),"card");
+                String sender_role = OneBotMessageTool.getJsonString(JSONObject.fromObject(OneBotMessageTool.getJsonString(json,"sender")),"role");
                 callGroupMessageEvent(data,time,self_id, post_type, message_type, sub_type,
                         message_id, user_id, message, arrayJsonMessage, font,
                         sender_nickname, sender_card, sender_role,group_id);
                 break;
             //如果是请求类型数据
             case "request":
-                String request_type = json.getString("request_type");
-                String comment = json.getString("comment");
-                String flag = json.getString("flag");
+                String request_type = OneBotMessageTool.getJsonString(json,"request_type");
+                String comment = OneBotMessageTool.getJsonString(json,"comment");
+                String flag = OneBotMessageTool.getJsonString(json,"flag");
                 if(request_type.equals("friend")){
                     callFriendRequestEvent(data,time,self_id, post_type, request_type, comment, flag,user_id);
                     break;
@@ -72,7 +74,7 @@ public class OneBotDataProcessing implements BotDataProcessing {
                 break;
             //如果是通知类型数据
             case "notice":
-                String notice_type = json.getString("notice_type");
+                String notice_type = OneBotMessageTool.getJsonString(json,"notice_type");
                 switch (notice_type){
                     //私聊消息撤回
                     case "friend_recall":
@@ -89,15 +91,15 @@ public class OneBotDataProcessing implements BotDataProcessing {
                         return;
                     //群文件上传
                     case "group_upload":
-                        String file_id = JSONObject.fromObject(json.getString("file")).getString("id");
-                        String file_name= JSONObject.fromObject(json.getString("file")).getString("name");
-                        long file_size = JSONObject.fromObject(json.getString("file")).getInt("size");
-                        long file_busid = JSONObject.fromObject(json.getString("file")).getInt("busid");
+                        String file_id = OneBotMessageTool.getJsonString(JSONObject.fromObject(OneBotMessageTool.getJsonString(json,"file")),"id");
+                        String file_name= OneBotMessageTool.getJsonString(JSONObject.fromObject(OneBotMessageTool.getJsonString(json,"file")),"name");
+                        long file_size = OneBotMessageTool.getJsonLong(JSONObject.fromObject(OneBotMessageTool.getJsonString(json,"file")),"size");
+                        long file_busid = OneBotMessageTool.getJsonLong(JSONObject.fromObject(OneBotMessageTool.getJsonString(json,"file")),"busid");
                         callGroupUploadFileEvent(data,time,self_id, post_type, notice_type,group_id,user_id,file_id,file_name,file_size,file_busid);
                         return;
                     //群内禁言事件
                     case "group_ban":
-                        long duration = json.getLong("duration");
+                        long duration = OneBotMessageTool.getJsonLong(json,"duration");
                         callGroupBanEvent(data,time,self_id, post_type, notice_type,sub_type,group_id,user_id,operator_id,duration);
                         return;
                     //添加好友事件
@@ -107,7 +109,7 @@ public class OneBotDataProcessing implements BotDataProcessing {
                     case "notify":
                         //戳一戳事件
                         if(sub_type.equals("poke")){
-                            long target_id = json.getLong("target_id");
+                            long target_id = OneBotMessageTool.getJsonLong(json,"target_id");
                             if(group_id == 0){
                                 callPrivatePokeEvent(data,time,self_id, post_type, notice_type,sub_type,user_id,target_id);
                                 return;
@@ -116,14 +118,14 @@ public class OneBotDataProcessing implements BotDataProcessing {
                         }
                         //群头衔变更
                         if(sub_type.equals("title")){
-                            String title = json.getString("title");
+                            String title = OneBotMessageTool.getJsonString(json,"title");
                             callGroupTitleEvent(data,time,self_id, post_type, notice_type,sub_type,group_id,user_id,title);
                         }
                         return;
                     //群名片更新
                     case "group_card":
-                        String card_new = json.getString("card_new");
-                        String card_old = json.getString("card_old");
+                        String card_new = OneBotMessageTool.getJsonString(json,"card_new");
+                        String card_old = OneBotMessageTool.getJsonString(json,"card_old");
                         callGroupCardEvent(data,time,self_id, post_type, notice_type,group_id,user_id,card_new,card_old);
                 }
         }
@@ -132,7 +134,7 @@ public class OneBotDataProcessing implements BotDataProcessing {
     @Override
     public boolean response(JSONObject json) {
         if (json.get("echo") != null && response.get(json.getString("echo"))!= null) {
-            response.get(json.getString("echo")).complete(json);
+            response.get(OneBotMessageTool.getJsonString(json,"echo")).complete(json);
             return true;
         }
         return false;

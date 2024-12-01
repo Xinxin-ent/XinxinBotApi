@@ -2,9 +2,12 @@ package com.xinxin;
 
 
 import com.xinxin.BotEnum.BotFrameEnum;
+import com.xinxin.Listeners.BindListener;
+import com.xinxin.Listeners.DeBugListener;
 import com.xinxin.PluginBasicTool.BotData;
 import com.xinxin.PluginBasicTool.MySQL;
 import com.xinxin.PluginBasicTool.Metrics;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -51,10 +54,12 @@ public class XinxinBotApi extends JavaPlugin{
 		System.out.println("§7[§a§l*§7] §b原创群服对接机器人 §c[推荐]");
 		System.out.println("§7[§a§l*§7] §b定制机器人插件、服务端插件……");
 		System.out.println("§7[§a§l*§7] §b详情联系作者：§f1072565329");
-		Bukkit.getPluginManager().registerEvents(new Xinxin_Listener(), this);
+		Bukkit.getPluginManager().registerEvents(new BindListener(), this);
 		Bukkit.getPluginManager().registerEvents(new DeBugListener(), this);
 		Bukkit.getPluginCommand("xbot").setExecutor(new Xinxin_Command());//绑定指令
-		new Papi();
+		if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")){
+			new Papi();
+		}
 		loadConfig();
 	}
 	public void onDisable() {//插件卸载触发
@@ -73,25 +78,24 @@ public class XinxinBotApi extends JavaPlugin{
 		config = getConfig();
 		if(getConfig().getBoolean("MySQL.Enable")){
 			System.out.println("▌ §a开始连接数据库 §6┈━═☆");
+			MySQL.initialize();
 			MySQL.createTable();
-			/*
+
 			//数据库掉线重连
 			(new BukkitRunnable() {
 				@Override
 				public void run() {
 					try {
-						if (connection != null && !connection.isClosed()) {
+						if (MySQL.getConnection() != null && !MySQL.getConnection().isClosed()) {
 							//System.out.println("§7[§a§l*§7] §a数据库检测");
-							connection.createStatement().execute("SELECT 1");
+							MySQL.getConnection().createStatement().execute("SELECT 1");
 						}
 					} catch (SQLException e) {
 						System.out.println("§7[§a§l*§7] §c未连接上数据库现为你重连");
-						connection = MySQL.Join();
+						MySQL.initialize();
 					}
 				}
 			}).runTaskTimerAsynchronously(this, 60 * 20, 60 * 20);
-
-			 */
 		}
 		connectBot();
 	}

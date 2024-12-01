@@ -14,6 +14,20 @@ public class OneBotMessageTool {
 
     public static final String cqRegex = "(.*?)(\\[CQ:(\\w+),([^\\]]+)](.*?))(?=(\\[CQ:|$))";
 
+    public static String getJsonString(JSONObject jsonObject,String key){
+        if(jsonObject.has(key)){
+            return jsonObject.getString(key);
+        }
+        return "";
+    }
+
+    public static long getJsonLong(JSONObject jsonObject,String key){
+        if(jsonObject.has(key)){
+            return jsonObject.getLong(key);
+        }
+        return 0L;
+    }
+
     public static String listToString(List<String> msg) {
         if (msg.size() <= 1) {
             return (String)msg.get(0);

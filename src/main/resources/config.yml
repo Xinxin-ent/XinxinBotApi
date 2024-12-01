@@ -37,10 +37,36 @@ MaxActiveCount: 10
 SetBind:
   #是否开启绑定账号功能
   #若不开启可通过其他插件或指令进行绑定操作
-  Enable: true
-  #绑定时需在群里发送的指令，指令后面即为需绑定的游戏账号
-  #举个栗子：#绑定账号 Xinxin
-  Command: "#绑定账号 "
+  enable: true
+  #监听的群聊
+  groups:
+    - "772914992"
+  #触发关键词即可进行绑定
+  keywords:
+    - "/bd"
+    - "绑定"
+    - "#绑定"
+    - "#绑定账号"
+  #申请绑定后游戏内提示
+  bind:
+    - ""
+    - "&cQQ用户{qq}申请与你进行绑定"
+    - "&c请在QQ群{group}中"
+    - "&c发送验证码{code}以进行绑定"
+  #验证码失效时间(单位：minute)
+  validTime: 5
+  #已经被绑定的提示
+  isBind:
+    - "你已经绑定过其他账号或者该玩家已经被人绑定"
+  #玩家不在线的提示
+  isOnline:
+    - "该玩家不在线或者不存在,请上线后重试"
+  #绑定成功提示
+  bindSuccess:
+    - "账号绑定成功"
+  #绑定失败提示
+  bindFailed:
+    - "绑定失败"
 MySQL:
   #是否启用MySQL数据库保存，若为false则为本地Yml保存
   Enable: false

@@ -18,63 +18,77 @@ import static com.xinxin.BotTool.OneBotMessageTool.msgToOneBotArray;
 public class OneBotActionBuilder implements BotActionBuilder {
     @Override
     public long sendPrivateMessage(long user_id, String message, boolean... auto_escape) {
-        return getData(BotData.getClient().sendData(
+        JSONObject jsonObject = getData(BotData.getClient().sendData(
                 new JsonAction("send_private_msg")
-                        .add("user_id",user_id)
-                        .add("message",auto_escape.length == 1 && auto_escape[0] ? message : msgToOneBotArray(message))
-                        .add("auto_escape", auto_escape.length == 1 && auto_escape[0]),true
-        )).getInt("message_id");
+                        .add("user_id", user_id)
+                        .add("message", auto_escape.length == 1 && auto_escape[0] ? message : msgToOneBotArray(message))
+                        .add("auto_escape", auto_escape.length == 1 && auto_escape[0]), true
+        ));
+
+        return jsonObject != null ? jsonObject.getInt("message_id") : 0;
     }
 
     @Override
     public long sendInterimMessage(long user_id, long group_id, String message, boolean... auto_escape) {
-        return getData(BotData.getClient().sendData(
+        JSONObject jsonObject = getData(BotData.getClient().sendData(
                 new JsonAction("send_private_msg")
-                    .add("user_id",user_id)
-                    .add("group_id",group_id)
-                    .add("message",auto_escape.length == 1 && auto_escape[0] ? message : msgToOneBotArray(message))
-                    .add("auto_escape", auto_escape.length == 1 && auto_escape[0]),true
-        )).getInt("message_id");
+                        .add("user_id",user_id)
+                        .add("group_id",group_id)
+                        .add("message",auto_escape.length == 1 && auto_escape[0] ? message : msgToOneBotArray(message))
+                        .add("auto_escape", auto_escape.length == 1 && auto_escape[0]),true
+        ));
+
+        return jsonObject != null ? jsonObject.getInt("message_id") : 0;
     }
 
     @Override
     public long sendGroupMessage(long group_id, String message, boolean... auto_escape) {
-        return getData(BotData.getClient().sendData(
+        JSONObject jsonObject = getData(BotData.getClient().sendData(
                 new JsonAction("send_group_msg")
-                    .add("group_id",group_id)
-                    .add("message",auto_escape.length == 1 && auto_escape[0] ? message : msgToOneBotArray(message))
-                    .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
-        )).getInt("message_id");
+                        .add("group_id",group_id)
+                        .add("message",auto_escape.length == 1 && auto_escape[0] ? message : msgToOneBotArray(message))
+                        .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
+        ));
+
+        return jsonObject != null ? jsonObject.getInt("message_id") : 0;
     }
     @Override
     public long sendPrivateMessage(long user_id, List<String> messages, boolean... auto_escape) {
-        return getData(BotData.getClient().sendData(
+
+        JSONObject jsonObject = getData(BotData.getClient().sendData(
                 new JsonAction("send_private_msg")
-                    .add("user_id",user_id)
-                    .add("message", auto_escape.length == 1 && auto_escape[0] ? listToOneBotArray(messages) : OneBotMessageTool.listToString(messages))
-                    .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
-        )).getInt("message_id");
+                        .add("user_id",user_id)
+                        .add("message", auto_escape.length == 1 && auto_escape[0] ? listToOneBotArray(messages) : OneBotMessageTool.listToString(messages))
+                        .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
+        ));
+
+        return jsonObject != null ? jsonObject.getInt("message_id") : 0;
     }
 
     @Override
     public long sendInterimMessage(long user_id, long group_id, List<String> messages, boolean... auto_escape) {
-        return getData(BotData.getClient().sendData(
+
+        JSONObject jsonObject = getData(BotData.getClient().sendData(
                 new JsonAction("send_private_msg")
-                    .add("user_id",user_id)
-                    .add("group_id",group_id)
-                    .add("message",auto_escape.length == 1 && auto_escape[0] ? listToOneBotArray(messages) : OneBotMessageTool.listToString(messages))
-                    .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
-        )).getInt("message_id");
+                        .add("user_id",user_id)
+                        .add("group_id",group_id)
+                        .add("message",auto_escape.length == 1 && auto_escape[0] ? listToOneBotArray(messages) : OneBotMessageTool.listToString(messages))
+                        .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
+        ));
+
+        return jsonObject != null ? jsonObject.getInt("message_id") : 0;
     }
 
     @Override
     public long sendGroupMessage(long group_id, List<String> messages, boolean... auto_escape) {
-        return getData(BotData.getClient().sendData(
+        JSONObject jsonObject = getData(BotData.getClient().sendData(
                 new JsonAction("send_group_msg")
-                    .add("group_id",group_id)
-                    .add("message",auto_escape.length == 1 && auto_escape[0] ? listToOneBotArray(messages) : OneBotMessageTool.listToString(messages))
-                    .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
-        )).getInt("message_id");
+                        .add("group_id",group_id)
+                        .add("message",auto_escape.length == 1 && auto_escape[0] ? listToOneBotArray(messages) : OneBotMessageTool.listToString(messages))
+                        .add("auto_escape",auto_escape.length == 1 && auto_escape[0]),true
+        ));
+
+        return jsonObject != null ? jsonObject.getInt("message_id") : 0;
     }
 
     @Override
@@ -253,7 +267,10 @@ public class OneBotActionBuilder implements BotActionBuilder {
 
 
     public JSONObject getData(JSONObject json){
-        return JSONObject.fromObject(json.getString("data"));
+        if(json.get("status") != null && json.getString("status").equals("ok")){
+            return JSONObject.fromObject(json.getString("data"));
+        }
+        return null;
     }
     public JSONArray getArrayData(JSONObject json){
         return JSONArray.fromObject(json.getString("data"));

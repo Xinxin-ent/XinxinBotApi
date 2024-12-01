@@ -3,6 +3,7 @@ version: ${version}
 main: com.xinxin.XinxinBotApi
 website: http://bbs.xxin.vip/
 author: 新鑫丶
+
 commands:
   xbot:
     description: 一个群服互联的机器人！

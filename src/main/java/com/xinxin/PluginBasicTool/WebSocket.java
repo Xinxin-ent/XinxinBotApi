@@ -31,19 +31,18 @@ public class WebSocket extends WebSocketClient{
 		System.out.println("§b[XinxinBotApi] §a机器人框架对接成功!");
 	}
 
-	// 创建一个固定大小的线程池，并将其转换为 ThreadPoolExecutor
-	private static final ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(BotData.getMaxActiveCount());
-
 	public void onMessage(String data) {
 		//启动了debug
 		if(BotData.isDeBug()){
 			System.out.println("§b[XinxinBotApi] §a接收到QQ数据:§e\n"+data+"\n");
-			System.out.println("§b[XinxinBotApi] §a当前线程数量: §e" + executorService.getActiveCount()+"/§c"+BotData.getMaxActiveCount());
+
 		}
 		JSONObject json = JSONObject.fromObject(data);
 
+		// 通过框架分析消息类型
 		if (!BotData.getBotDataProcessing().response(json)) {
-			executorService.submit(() -> {
+			// 异步执行处理事件
+			Bukkit.getScheduler().runTaskAsynchronously(XinxinBotApi.getInstance(), () -> {
 				BotData.getBotDataProcessing().handle(json, data);
 			});
 		}
@@ -60,13 +59,18 @@ public class WebSocket extends WebSocketClient{
 			Reconnect++;
 			System.out.println("§b[XinxinBotApi] §e【"+Reconnect+"/"+max+"】 §c正在尝试重新连接...");
 			XinxinBotApi.getInstance().connectBot();
+
+			if(Reconnect >= max){
+				System.out.println("§b[XinxinBotApi] §c尝试重连失败！");
+				Bukkit.getScheduler().cancelTask(atomicInteger.get());
+				return;
+			}
+
 			if(BotData.getClient() != null && !BotData.getClient().isClosed()){
 				System.out.println("§b[XinxinBotApi] §a重连成功！");
 				Bukkit.getScheduler().cancelTask(atomicInteger.get());
-			}else if(Reconnect >= max){
-				System.out.println("§b[XinxinBotApi] §c尝试重连失败！");
-				Bukkit.getScheduler().cancelTask(atomicInteger.get());
 			}
+
 		}, 60L, 60L).getTaskId());
 	}
 
@@ -87,7 +91,7 @@ public class WebSocket extends WebSocketClient{
 			// 使用 Bukkit 的调度器设置超时任务
 			Bukkit.getScheduler().runTaskLaterAsynchronously(XinxinBotApi.getInstance(), () -> {
 				if (!res.isDone()) {
-					res.completeExceptionally(new TimeoutException("Request timed out"));
+					res.completeExceptionally(new TimeoutException("获取消息反馈任务超时"));
 					response.remove(data.uuid);
 				}
 			}, BotData.getTaskTimeout() * 20); // 转换为 tick，假设 1 秒 = 20 tick
@@ -101,7 +105,6 @@ public class WebSocket extends WebSocketClient{
 				response.remove(data.uuid);
 			}
 		}
-
 		return null;
 	}
 
